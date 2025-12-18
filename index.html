@@ -2,41 +2,55 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com Música Tema</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Flipbook Interativo</title>
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
     <style>
         body { 
-            background-color: #1a1a1a; 
+            background-color: #2c2c2c; 
+            margin: 0; 
+            padding: 0; 
             display: flex; 
-            flex-direction: column;
-            justify-content: center; 
+            flex-direction: column; 
             align-items: center; 
+            justify-content: center; 
             height: 100vh; 
-            margin: 0;
+            overflow: hidden;
             font-family: sans-serif;
         }
-        .container { width: 500px; height: 700px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .page { background-color: white; overflow: hidden; }
-        .page img, .page video { width: 100%; height: 100%; object-fit: contain; }
-        
-        /* Estilo do botão de som */
-        #music-control {
-            margin-top: 20px;
-            padding: 10px 20px;
-            cursor: pointer;
-            background: #fff;
-            border: none;
-            border-radius: 20px;
-            font-weight: bold;
+
+        .container {
+            width: 90vw; /* Usa 90% da largura da tela */
+            height: 80vh; /* Usa 80% da altura da tela */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
+        /* Estilo das páginas */
+        .page { background-color: white; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+        .page img, .page video { width: 100%; height: 100%; object-fit: contain; }
+
+        #controls { position: fixed; bottom: 20px; z-index: 100; }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 30px;
+            border: none;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+        button:hover { transform: scale(1.05); background: #f0f0f0; }
     </style>
 </head>
 <body>
 
 <audio id="theme-song" src="assets/musica-tema.mp3" loop></audio>
 
-<div class="container" id="book-container">
+<div class="container">
     <div id="my-flipbook">
         <div class="page"><img src="assets/1.png"></div>
         <div class="page"><img src="assets/2.png"></div>
@@ -49,42 +63,38 @@
     </div>
 </div>
 
-<button id="music-control">Clique para iniciar o Livro e a Música</button>
+<div id="controls">
+    <button id="btn-play">🎵 Iniciar Experiência</button>
+</div>
 
 <script>
     const audio = document.getElementById('theme-song');
-    const btn = document.getElementById('music-control');
+    const btn = document.getElementById('btn-play');
 
-    // Inicialização do Livro
+    // Configuração do Flipbook
     const pageFlip = new St.PageFlip(document.getElementById('my-flipbook'), {
-        width: 500,
-        height: 700,
+        width: 400, // largura base
+        height: 600, // altura base
+        size: "stretch", // faz o livro esticar para caber no container
+        minWidth: 310,
+        maxWidth: 1000,
+        minHeight: 420,
+        maxHeight: 1350,
         showCover: true,
-        maxShadowOpacity: 0.2,
-        flippingTime: 1000,
-        swipeDistance: 30,
-        clickEventForward: true,
-        useMouseEvents: true // Permite arrastar com o mouse
+        useMouseEvents: true,
+        flippingTime: 800
     });
 
     pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-    // Lógica para tocar a música e esconder o botão no primeiro clique
-    btn.addEventListener('click', () => {
-        audio.play();
-        btn.innerText = "Música Ativa (Pausar)";
-        // Opcional: esconder o botão após iniciar
-        // btn.style.display = 'none'; 
-    });
-
-    // Controle de Play/Pause alternado
+    // Iniciar áudio e remover botão após interação
     btn.addEventListener('click', () => {
         if (audio.paused) {
             audio.play();
-            btn.innerText = "Música Ativa";
+            btn.innerText = "Pausar Música";
         } else {
             audio.pause();
-            btn.innerText = "Música Pausada";
+            btn.innerText = "Tocar Música";
         }
     });
 </script>
