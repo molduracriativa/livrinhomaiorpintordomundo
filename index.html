@@ -10,42 +10,43 @@
         
         body, html { 
             width: 100%; height: 100%; 
-            overflow: hidden; background-color: #ffffff; 
+            overflow: hidden; background-color: #000000; /* Fundo preto para foco total */
         }
 
         #canvas-wrapper {
             width: 100vw; height: 100vh;
-            display: flex; justify-content: center; align-items: center;
-            padding-bottom: 90px; /* Margem inferior solicitada */
+            display: flex; justify-content: center; align-items: flex-start;
+            padding-bottom: 90px; /* Sua margem inferior */
         }
 
-        /* O segredo para não travar: tamanho fixo baseado em 9:16 */
+        /* Força o container a ser vertical 9:16 */
         #my-flipbook {
-            width: 100%; max-width: 450px; 
-            height: 800px;
+            width: 100vw !important;
+            height: calc(100vh - 90px) !important;
         }
 
         .page { width: 100%; height: 100%; background-color: white; }
 
         .page img { 
             width: 100%; height: 100%; 
-            object-fit: fill; display: block;
+            object-fit: fill; /* Preenche tudo */
+            display: block;
         }
 
-        /* Hotspots Invisíveis na Página 7 */
+        /* Botões Invisíveis na Página 7 */
         .hotspot-container {
             position: absolute;
-            bottom: 120px; /* Ajuste aqui para subir/descer os botões na vertical */
+            bottom: 15%; /* Ajuste a altura aqui */
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 105px; /* Espaço de 105px entre botões */
+            gap: 105px;
             z-index: 10;
         }
 
         .btn-invisible {
-            width: 100px; height: 100px;
-            background: rgba(255, 0, 0, 0); /* Mude para 0.2 para ver onde está o botão */
+            width: 120px; height: 120px;
+            background: rgba(255, 0, 0, 0); /* Mude para 0.2 para testar */
             border-radius: 50%; display: block;
             pointer-events: auto;
         }
@@ -89,26 +90,29 @@
     const pageFlip = new St.PageFlip(document.getElementById('my-flipbook'), {
         width: 450, 
         height: 800,
-        size: "stretch", // Faz o preenchimento
+        size: "stretch", 
+        minWidth: 300,
+        maxWidth: 1000,
+        minHeight: 533,
+        maxHeight: 1778,
         showCover: false, 
         useMouseEvents: true,
         flippingTime: 500,
-        swipeDistance: 10,
-        usePortrait: true,
+        swipeDistance: 15,
+        usePortrait: true, // ESTA LINHA OBRIGA A MOSTRAR APENAS UMA PÁGINA
         startPage: 0,
-        showPageCorners: true, // Reativado para ajudar a "destravar" visualmente a página
+        showPageCorners: true,
         disableCanvasCopy: false,
-        mobileScrollSupport: false
+        clickEventForward: true,
+        mode: "portrait" // REFORÇA O MODO RETRATO
     });
 
     pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-    // Gatilho de áudio em qualquer interação
     pageFlip.on('flip', () => { playAudio(); });
     document.addEventListener('touchstart', playAudio, { once: false });
     document.addEventListener('mousedown', playAudio, { once: false });
 
-    // Se o redimensionamento travar, este comando limpa o erro
     window.addEventListener('resize', () => {
         pageFlip.updateFromHtml(document.querySelectorAll('.page'));
     });
