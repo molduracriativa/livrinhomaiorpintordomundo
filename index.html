@@ -20,9 +20,9 @@
             height: 100vh;
             display: flex;
             justify-content: center;
-            /* Sobe o livro levemente */
             align-items: center; 
-            padding-bottom: 60px; /* Cria o espaço embaixo para subir o convite */
+            /* Espaço inferior aumentado para 90px */
+            padding-bottom: 90px; 
         }
 
         .page { 
@@ -34,13 +34,13 @@
         .page img, .page video { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; /* Mantém a proporção 9:16 sem esticar */
+            object-fit: contain; 
             display: block;
         }
 
-        /* Ajuste visual para o livro */
+        /* Ajuste fino para centralização visual */
         #my-flipbook {
-            transform: translateY(-20px); /* Ajuste fino para subir o livro */
+            margin-top: -20px;
         }
     </style>
 </head>
@@ -73,29 +73,35 @@
     };
 
     const pageFlip = new St.PageFlip(document.getElementById('my-flipbook'), {
-        width: 450, // Proporção base 9:16
+        width: 450, 
         height: 800,
         size: "stretch",
         minWidth: 300,
         maxWidth: 1000,
         minHeight: 533,
         maxHeight: 1778,
-        showCover: false, // Define como falso para a capa ser tratada como página comum
+        showCover: false, 
         useMouseEvents: true,
-        flippingTime: 700,
-        swipeDistance: 15, // DISTÂNCIA CURTA: Arrastou um pouco, ela já vira sozinha
+        flippingTime: 600, // Velocidade da animação um pouco mais rápida
+        
+        // MELHORIA NA VIRADA:
+        swipeDistance: 10, // Inicia a virada com apenas 10px de movimento
         clickEventForward: true,
-        usePortrait: true, // Força o modo retrato (uma página por vez)
-        startPage: 0
+        usePortrait: true,
+        startPage: 0,
+        
+        // Ativa a detecção automática para completar a virada no meio do caminho
+        autoSize: true 
     });
 
     pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-    // Inicia música ao virar ou tocar
+    // Inicia música em qualquer interação
     pageFlip.on('flip', () => { startMusic(); });
     document.addEventListener('touchstart', startMusic, { once: true });
     document.addEventListener('mousedown', startMusic, { once: true });
 
+    // Garante que o flipbook se ajuste ao tamanho da tela
     window.addEventListener('resize', () => {
         pageFlip.updateFromHtml(document.querySelectorAll('.page'));
     });
