@@ -2,43 +2,64 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Convite Especial</title>
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
     <style>
-        body { 
-            background-color: #f0f0f0; 
-            margin: 0; padding: 0; 
-            overflow: hidden; 
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; width: 100vw;
-        }
-
-        /* Container ocupa 100% da tela disponível */
-        .container { 
+        /* Reset total para preencher a tela */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body, html { 
             width: 100%; 
             height: 100%; 
-            display: flex; justify-content: center; align-items: center; 
+            overflow: hidden; 
+            background-color: #ffffff; /* Cor de fundo caso a imagem demore a carregar */
         }
 
-        .page { background-color: white; }
-        .page img, .page video { width: 100%; height: 100%; object-fit: contain; }
+        /* Container principal em tela cheia */
+        #canvas-wrapper {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Configuração das páginas */
+        .page { 
+            background-color: white; 
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Faz a imagem ocupar 100% da página sem bordas */
+        .page img, .page video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: fill; /* Força o preenchimento no formato 9:16 */
+            display: block;
+        }
+
+        /* Área de interação invisível para evitar que o navegador entenda como scroll */
+        #my-flipbook {
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
 
-<audio id="theme-song" src="assets/musica-tema.mp3" loop></audio>
+<audio id="theme-song" src="assets/musica-tema.mp3" loop preload="auto"></audio>
 
-<div class="container" id="wrapper">
+<div id="canvas-wrapper">
     <div id="my-flipbook">
-        <div class="page"><img src="assets/1.png"></div>
+        <div class="page" data-density="hard"><img src="assets/1.png"></div>
         <div class="page"><img src="assets/2.png"></div>
         <div class="page"><img src="assets/3.png"></div>
         <div class="page"><img src="assets/4.png"></div>
         <div class="page"><img src="assets/5.png"></div>
         <div class="page"><img src="assets/6.png"></div>
         <div class="page"><img src="assets/7.png"></div>
-        <div class="page"><img src="assets/8.png"></div>
+        <div class="page" data-density="hard"><img src="assets/8.png"></div>
     </div>
 </div>
 
@@ -46,36 +67,46 @@
     const audio = document.getElementById('theme-song');
     let musicStarted = false;
 
+    // Função para iniciar a música
+    const startMusic = () => {
+        if (!musicStarted) {
+            audio.play().catch(e => console.log("Áudio aguardando gesto"));
+            musicStarted = true;
+        }
+    };
+
+    // Configuração do Flipbook focada em Mobile 9:16
     const pageFlip = new St.PageFlip(document.getElementById('my-flipbook'), {
-        width: 400,
-        height: 600,
-        size: "stretch", // Ocupa a tela toda
-        minWidth: 310,
+        width: window.innerWidth, // Largura total do celular
+        height: window.innerHeight, // Altura total do celular
+        size: "stretch",
+        minWidth: 300,
         maxWidth: 2000,
-        minHeight: 420,
+        minHeight: 400,
         maxHeight: 3000,
         showCover: true,
         useMouseEvents: true,
-        flippingTime: 1000
+        showPageCorners: true, // Mostra uma curvinha no canto para ajudar o usuário
+        flippingTime: 800,
+        mobileScrollSupport: false // Evita conflitos com o touch do celular
     });
 
+    // Carrega as páginas
     pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-    // GATILHO DE MÚSICA: Ao começar a virar a página, o som toca
-    pageFlip.on('flip', () => {
-        if (!musicStarted) {
-            audio.play().catch(e => console.log("Aguardando interação"));
-            musicStarted = true;
-        }
+    // Evento de virada de página (dispara a música)
+    pageFlip.on('flip', (e) => {
+        startMusic();
     });
 
-    // Fallback: Se o usuário apenas clicar/tocar sem virar a página totalmente
-    document.addEventListener('click', () => {
-        if (!musicStarted) {
-            audio.play();
-            musicStarted = true;
-        }
-    }, { once: true }); // Executa apenas uma vez
+    // Evento de clique simples (dispara a música caso não vire a página)
+    document.addEventListener('touchstart', startMusic, { once: true });
+    document.addEventListener('mousedown', startMusic, { once: true });
+
+    // Ajusta o tamanho se o usuário rotacionar o celular
+    window.addEventListener('resize', () => {
+        pageFlip.updateFromHtml(document.querySelectorAll('.page'));
+    });
 </script>
 
 </body>
