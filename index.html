@@ -21,8 +21,7 @@
             display: flex;
             justify-content: center;
             align-items: center; 
-            /* Espaço inferior aumentado para 90px */
-            padding-bottom: 90px; 
+            padding-bottom: 90px; /* Mantendo o espaço inferior solicitado */
         }
 
         .page { 
@@ -36,11 +35,6 @@
             height: 100%; 
             object-fit: contain; 
             display: block;
-        }
-
-        /* Ajuste fino para centralização visual */
-        #my-flipbook {
-            margin-top: -20px;
         }
     </style>
 </head>
@@ -82,26 +76,29 @@
         maxHeight: 1778,
         showCover: false, 
         useMouseEvents: true,
-        flippingTime: 600, // Velocidade da animação um pouco mais rápida
         
-        // MELHORIA NA VIRADA:
-        swipeDistance: 10, // Inicia a virada com apenas 10px de movimento
-        clickEventForward: true,
+        // --- AJUSTES DE SENSIBILIDADE ---
+        flippingTime: 400,        // Mais rápido para completar a virada logo
+        swipeDistance: 5,         // Distância mínima de arrasto para ativar
+        clickEventForward: true,   // Toque rápido também vira a página
         usePortrait: true,
         startPage: 0,
-        
-        // Ativa a detecção automática para completar a virada no meio do caminho
-        autoSize: true 
+        showPageCorners: true,     // Ajuda visual para o usuário ver onde puxar
+        disableCanvasCopy: false
     });
 
     pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-    // Inicia música em qualquer interação
+    // Eventos de áudio
     pageFlip.on('flip', () => { startMusic(); });
     document.addEventListener('touchstart', startMusic, { once: true });
-    document.addEventListener('mousedown', startMusic, { once: true });
+    
+    // Forçar a virada ao chegar perto do meio (Lógica Extra)
+    pageFlip.on('flip', (e) => {
+        // Garantir que o áudio toque sempre que houver mudança
+        startMusic();
+    });
 
-    // Garante que o flipbook se ajuste ao tamanho da tela
     window.addEventListener('resize', () => {
         pageFlip.updateFromHtml(document.querySelectorAll('.page'));
     });
