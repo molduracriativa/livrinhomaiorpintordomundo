@@ -6,43 +6,41 @@
     <title>Convite Especial</title>
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
     <style>
-        /* Reset total para preencher a tela */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body, html { 
             width: 100%; 
             height: 100%; 
             overflow: hidden; 
-            background-color: #ffffff; /* Cor de fundo caso a imagem demore a carregar */
+            background-color: #ffffff; 
         }
 
-        /* Container principal em tela cheia */
         #canvas-wrapper {
             width: 100vw;
             height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            /* Sobe o livro levemente */
+            align-items: center; 
+            padding-bottom: 60px; /* Cria o espaço embaixo para subir o convite */
         }
 
-        /* Configuração das páginas */
         .page { 
             background-color: white; 
             width: 100%;
             height: 100%;
         }
 
-        /* Faz a imagem ocupar 100% da página sem bordas */
         .page img, .page video { 
             width: 100%; 
             height: 100%; 
-            object-fit: fill; /* Força o preenchimento no formato 9:16 */
+            object-fit: contain; /* Mantém a proporção 9:16 sem esticar */
             display: block;
         }
 
-        /* Área de interação invisível para evitar que o navegador entenda como scroll */
+        /* Ajuste visual para o livro */
         #my-flipbook {
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transform: translateY(-20px); /* Ajuste fino para subir o livro */
         }
     </style>
 </head>
@@ -52,14 +50,14 @@
 
 <div id="canvas-wrapper">
     <div id="my-flipbook">
-        <div class="page" data-density="hard"><img src="assets/1.png"></div>
-        <div class="page"><img src="assets/2.png"></div>
-        <div class="page"><img src="assets/3.png"></div>
-        <div class="page"><img src="assets/4.png"></div>
-        <div class="page"><img src="assets/5.png"></div>
-        <div class="page"><img src="assets/6.png"></div>
-        <div class="page"><img src="assets/7.png"></div>
-        <div class="page" data-density="hard"><img src="assets/8.png"></div>
+        <div class="page" data-density="soft"><img src="assets/1.png"></div>
+        <div class="page" data-density="soft"><img src="assets/2.png"></div>
+        <div class="page" data-density="soft"><img src="assets/3.png"></div>
+        <div class="page" data-density="soft"><img src="assets/4.png"></div>
+        <div class="page" data-density="soft"><img src="assets/5.png"></div>
+        <div class="page" data-density="soft"><img src="assets/6.png"></div>
+        <div class="page" data-density="soft"><img src="assets/7.png"></div>
+        <div class="page" data-density="soft"><img src="assets/8.png"></div>
     </div>
 </div>
 
@@ -67,43 +65,37 @@
     const audio = document.getElementById('theme-song');
     let musicStarted = false;
 
-    // Função para iniciar a música
     const startMusic = () => {
         if (!musicStarted) {
-            audio.play().catch(e => console.log("Áudio aguardando gesto"));
+            audio.play().catch(e => console.log("Interação necessária"));
             musicStarted = true;
         }
     };
 
-    // Configuração do Flipbook focada em Mobile 9:16
     const pageFlip = new St.PageFlip(document.getElementById('my-flipbook'), {
-        width: window.innerWidth, // Largura total do celular
-        height: window.innerHeight, // Altura total do celular
+        width: 450, // Proporção base 9:16
+        height: 800,
         size: "stretch",
         minWidth: 300,
-        maxWidth: 2000,
-        minHeight: 400,
-        maxHeight: 3000,
-        showCover: true,
+        maxWidth: 1000,
+        minHeight: 533,
+        maxHeight: 1778,
+        showCover: false, // Define como falso para a capa ser tratada como página comum
         useMouseEvents: true,
-        showPageCorners: true, // Mostra uma curvinha no canto para ajudar o usuário
-        flippingTime: 800,
-        mobileScrollSupport: false // Evita conflitos com o touch do celular
+        flippingTime: 700,
+        swipeDistance: 15, // DISTÂNCIA CURTA: Arrastou um pouco, ela já vira sozinha
+        clickEventForward: true,
+        usePortrait: true, // Força o modo retrato (uma página por vez)
+        startPage: 0
     });
 
-    // Carrega as páginas
     pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-    // Evento de virada de página (dispara a música)
-    pageFlip.on('flip', (e) => {
-        startMusic();
-    });
-
-    // Evento de clique simples (dispara a música caso não vire a página)
+    // Inicia música ao virar ou tocar
+    pageFlip.on('flip', () => { startMusic(); });
     document.addEventListener('touchstart', startMusic, { once: true });
     document.addEventListener('mousedown', startMusic, { once: true });
 
-    // Ajusta o tamanho se o usuário rotacionar o celular
     window.addEventListener('resize', () => {
         pageFlip.updateFromHtml(document.querySelectorAll('.page'));
     });
