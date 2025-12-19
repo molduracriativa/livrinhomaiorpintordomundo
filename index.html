@@ -21,20 +21,45 @@
             display: flex;
             justify-content: center;
             align-items: center; 
-            padding-bottom: 90px; /* Mantendo o espaço inferior solicitado */
+            padding-bottom: 90px; /* Margem inferior de 90px solicitada */
         }
 
         .page { 
             background-color: white; 
             width: 100%;
             height: 100%;
+            position: relative; /* Necessário para posicionar os botões */
         }
 
-        .page img, .page video { 
+        .page img { 
             width: 100%; 
             height: 100%; 
             object-fit: contain; 
             display: block;
+        }
+
+        /* Container dos Hotspots Invisíveis */
+        .hotspot-container {
+            position: absolute;
+            top: 50%; /* Inicia no meio da página */
+            left: 50%;
+            transform: translate(-50%, -20%); /* Ajuste fino de subida/descida */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 105px; /* Espaço de 105px entre os botões */
+            width: 100%;
+            pointer-events: none; /* Garante que o container não bloqueie o flip */
+        }
+
+        .btn-invisible {
+            width: 324px; /* Largura de 324px */
+            height: 60px; /* Altura da área clicável */
+            background: rgba(255, 0, 0, 0); /* TOTALMENTE INVISÍVEL */
+            /* background: rgba(255, 0, 0, 0.2); <-- DESCOMENTE ESTA LINHA PARA VER ONDE ESTÃO OS BOTÕES AO TESTAR */
+            display: block;
+            pointer-events: auto; /* Reativa o clique apenas no botão */
+            text-decoration: none;
         }
     </style>
 </head>
@@ -50,7 +75,16 @@
         <div class="page" data-density="soft"><img src="assets/4.png"></div>
         <div class="page" data-density="soft"><img src="assets/5.png"></div>
         <div class="page" data-density="soft"><img src="assets/6.png"></div>
-        <div class="page" data-density="soft"><img src="assets/7.png"></div>
+        
+        <div class="page" data-density="soft">
+            <img src="assets/7.png">
+            <div class="hotspot-container">
+                <a href="APAGUE_E_COLE_O_LINK_AQUI" target="_blank" class="btn-invisible"></a>
+                
+                <a href="APAGUE_E_COLE_O_LINK_AQUI" target="_blank" class="btn-invisible"></a>
+            </div>
+        </div>
+
         <div class="page" data-density="soft"><img src="assets/8.png"></div>
     </div>
 </div>
@@ -76,28 +110,19 @@
         maxHeight: 1778,
         showCover: false, 
         useMouseEvents: true,
-        
-        // --- AJUSTES DE SENSIBILIDADE ---
-        flippingTime: 400,        // Mais rápido para completar a virada logo
-        swipeDistance: 5,         // Distância mínima de arrasto para ativar
-        clickEventForward: true,   // Toque rápido também vira a página
+        flippingTime: 400, // Virada rápida
+        swipeDistance: 5,   // Sensibilidade alta
+        clickEventForward: true, // Permite clicar para virar
         usePortrait: true,
-        startPage: 0,
-        showPageCorners: true,     // Ajuda visual para o usuário ver onde puxar
-        disableCanvasCopy: false
+        startPage: 0
     });
 
     pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-    // Eventos de áudio
+    // Lógica de áudio e sensibilidade
     pageFlip.on('flip', () => { startMusic(); });
     document.addEventListener('touchstart', startMusic, { once: true });
-    
-    // Forçar a virada ao chegar perto do meio (Lógica Extra)
-    pageFlip.on('flip', (e) => {
-        // Garantir que o áudio toque sempre que houver mudança
-        startMusic();
-    });
+    document.addEventListener('mousedown', startMusic, { once: true });
 
     window.addEventListener('resize', () => {
         pageFlip.updateFromHtml(document.querySelectorAll('.page'));
