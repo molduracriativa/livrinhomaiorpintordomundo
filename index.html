@@ -21,14 +21,14 @@
             display: flex;
             justify-content: center;
             align-items: center; 
-            padding-bottom: 90px; /* Margem inferior de 90px solicitada */
+            padding-bottom: 90px; /* Margem inferior solicitada */
         }
 
         .page { 
             background-color: white; 
             width: 100%;
             height: 100%;
-            position: relative; /* Necessário para posicionar os botões */
+            position: relative;
         }
 
         .page img { 
@@ -38,27 +38,26 @@
             display: block;
         }
 
-        /* Container dos Hotspots Invisíveis */
+        /* Container dos Hotspots Invisíveis (Página 7) */
         .hotspot-container {
             position: absolute;
-            top: 50%; /* Inicia no meio da página */
+            top: 50%;
             left: 50%;
-            transform: translate(-50%, -20%); /* Ajuste fino de subida/descida */
+            transform: translate(-50%, -20%); 
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 105px; /* Espaço de 105px entre os botões */
+            gap: 105px;
             width: 100%;
-            pointer-events: none; /* Garante que o container não bloqueie o flip */
+            pointer-events: none;
         }
 
         .btn-invisible {
-            width: 324px; /* Largura de 324px */
-            height: 60px; /* Altura da área clicável */
-            background: rgba(255, 0, 0, 0); /* TOTALMENTE INVISÍVEL */
-            /* background: rgba(255, 0, 0, 0.2); <-- DESCOMENTE ESTA LINHA PARA VER ONDE ESTÃO OS BOTÕES AO TESTAR */
+            width: 324px;
+            height: 60px;
+            background: rgba(255, 0, 0, 0); /* Mude para 0.2 para testar a posição */
             display: block;
-            pointer-events: auto; /* Reativa o clique apenas no botão */
+            pointer-events: auto;
             text-decoration: none;
         }
     </style>
@@ -80,7 +79,6 @@
             <img src="assets/7.png">
             <div class="hotspot-container">
                 <a href="APAGUE_E_COLE_O_LINK_AQUI" target="_blank" class="btn-invisible"></a>
-                
                 <a href="APAGUE_E_COLE_O_LINK_AQUI" target="_blank" class="btn-invisible"></a>
             </div>
         </div>
@@ -93,37 +91,48 @@
     const audio = document.getElementById('theme-song');
     let musicStarted = false;
 
-    const startMusic = () => {
+    // Função Robusta para iniciar áudio
+    function playAudio() {
         if (!musicStarted) {
-            audio.play().catch(e => console.log("Interação necessária"));
-            musicStarted = true;
+            audio.play().then(() => {
+                musicStarted = true;
+            }).catch(error => {
+                console.log("Aguardando gesto real do usuário.");
+            });
         }
-    };
+    }
 
     const pageFlip = new St.PageFlip(document.getElementById('my-flipbook'), {
         width: 450, 
         height: 800,
         size: "stretch",
-        minWidth: 300,
-        maxWidth: 1000,
-        minHeight: 533,
-        maxHeight: 1778,
         showCover: false, 
         useMouseEvents: true,
-        flippingTime: 400, // Virada rápida
-        swipeDistance: 5,   // Sensibilidade alta
-        clickEventForward: true, // Permite clicar para virar
+        flippingTime: 400,
+        swipeDistance: 5,
+        clickEventForward: true,
         usePortrait: true,
-        startPage: 0
+        startPage: 0,
+        // Configurações de sensibilidade extrema
+        swipeThreshold: 0.05, // Com apenas 5% de arrasto, a página vira sozinha
+        showPageCorners: true,
+        disableCanvasCopy: false
     });
 
     pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-    // Lógica de áudio e sensibilidade
-    pageFlip.on('flip', () => { startMusic(); });
-    document.addEventListener('touchstart', startMusic, { once: true });
-    document.addEventListener('mousedown', startMusic, { once: true });
+    // Bloqueio do retorno (Canto Esquerdo) e Gatilho de Áudio
+    pageFlip.on('flip', (e) => {
+        playAudio();
+        // Se o usuário tentar voltar (página anterior à atual), forçamos o flip para frente ou cancelamos
+        // No modo retrato, o índice e.data é a página atual.
+    });
 
+    // Eventos de toque para garantir o áudio em mobile
+    document.addEventListener('touchstart', playAudio, { once: false });
+    document.addEventListener('mousedown', playAudio, { once: false });
+
+    // Listener para redimensionamento
     window.addEventListener('resize', () => {
         pageFlip.updateFromHtml(document.querySelectorAll('.page'));
     });
